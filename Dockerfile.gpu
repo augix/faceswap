@@ -1,7 +1,16 @@
-FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu16.04
+FROM nvidia/cuda:11.0.3-cudnn8-devel-ubuntu16.04
+
+# zju apt-get mirror
+COPY sources.list.zju /etc/apt/sources.list
+
+# install proxychains for breaking GFW when neccessary
+# it also needs privoxy on host and an ssh connection to oversee server
+RUN apt-get update
+RUN apt-get install proxychains -y
+COPY proxychains.conf /etc/proxychains.conf
 
 #install python3.8
-RUN apt-get update
+#RUN apt-get update
 RUN apt-get install software-properties-common -y
 RUN add-apt-repository ppa:deadsnakes/ppa -y
 RUN apt-get update
@@ -12,6 +21,11 @@ RUN apt-get install curl -y
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 RUN python3.8 get-pip.py
 RUN rm get-pip.py
+
+# zju pypi mirror
+RUN python3.8 -m pip install -i https://mirrors.zju.edu.cn/pypi/web/simple pip -U
+RUN python3.8 -m pip config set global.index-url https://mirrors.zju.edu.cn/pypi/web/simple
+
 
 # install requirements
 RUN apt-get install ffmpeg git -y
@@ -24,5 +38,12 @@ RUN python3.8 -m pip install jupyter_http_over_ws
 RUN jupyter serverextension enable --py jupyter_http_over_ws
 RUN alias python=python3.8
 RUN echo "alias python=python3.8" >> /root/.bashrc
-WORKDIR "/notebooks"
-CMD ["jupyter-notebook", "--allow-root" ,"--port=8888" ,"--no-browser" ,"--ip=0.0.0.0"]
+
+# install bash kernel and enable progress bar with widget
+RUN python3.8 -m pip install bash_kernel
+RUN python3.8 -m bash_kernel.install
+RUN jupyter nbextension enable --py widgetsnbextension
+
+
+#WORKDIR "/notebooks"
+#CMD ["jupyter-notebook", "--allow-root" ,"--port=8888" ,"--no-browser" ,"--ip=0.0.0.0"]

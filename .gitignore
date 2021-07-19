@@ -3,6 +3,10 @@
 !*.keep
 !*.md
 
+# zju files
+!sources.list.zju
+!proxychains.conf
+
 # Root files
 !Dockerfile*
 !.pylintrc
