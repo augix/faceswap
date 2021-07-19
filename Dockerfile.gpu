@@ -1,9 +1,10 @@
 FROM nvidia/cuda:11.0.3-cudnn8-devel-ubuntu16.04
 
-# zju apt
+# zju apt-get mirror
 COPY sources.list.zju /etc/apt/sources.list
 
-# install proxychains for internet access
+# install proxychains for breaking GFW when neccessary
+# it also needs privoxy on host and an ssh connection to oversee server
 RUN apt-get update
 RUN apt-get install proxychains -y
 COPY proxychains.conf /etc/proxychains.conf
